@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Nodejs Title</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.css" integrity="sha512-8QbEO8yS//4kwUDxGu/AS49R2nVILw83kYCtgxBYk+Uw0B9S4R0RgSwvhGLwMaZuYzhhR5ZHR9dA2cDgphRTgg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+    <body>
+        <p>{{msg}}</p>
+        <h1>Single Elimination</h1>
+        <p id="result"></p>
+        <div class="singleTournament"></div>
+        
+        {{!-- <script type="text/javascript" src="jquery-3.6.0.min.js"></script> --}}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+        <!-- <script type="text/javascript" src="jquery.bracket.min.js"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-bracket/0.11.1/jquery.bracket.min.js" integrity="sha512-BgJKmxJA3rvUEa00GOdL9BJm5+lu6V7Gx2K0qWDitRi0trcA+kS/VYJuzlqlwGJ0eUeIopW4T9faczsg8hzE/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+
+            function httpGet(Url,callback){
+                const request=new XMLHttpRequest();
+                request.open('get',Url,true);
+                request.onload=function(){
+                    callback(request)
+                }
+                request.send();
+            }
+            httpGet('http://localhost:3000/AJAXparticipants/60bb2d5b342ae63a70c05b25',function(request){
+                {{!-- console.log(request.responseText) --}}
+
+                
+                let res=JSON.parse(request.responseText)
+                let nameArr=res.nameArr
+                let scoreArr=[]
+                let matches=res.matches
+
+
+                //for names
+                let len=nameArr.length
+                let temp=[];
+                for(let i=0;i<len;i++){
+                    let temp2=[]
+                    temp2.push(nameArr[i])
+                    temp2.push(nameArr[i+1])
+                    temp.push(temp2)
+                    i=i+1;
+                }
+                console.log(temp)
+
+                //for scores
+                let roundArr=[]
+                for (const iterator of matches) {
+                    let flag=false
+                    if(roundArr.length <= 0){
+                        roundArr.push(iterator.round)
+                    }
+                    for (const [j,iterator2] of roundArr.entries()) {
+                        if(iterator2 == iterator.round){
+                            flag=true
+                        }
+                        if(j==roundArr.length-1){
+                            if(flag==false){
+                                roundArr.push(iterator.round)
+                            }
+                        }
+                    }
+                }
+                
+                for(let iterator of roundArr){
+                    let arr2=[]
+                    for (const [j,iterator2] of matches.entries()) {
+                        let arr3=[]
+                        if(iterator == iterator2.round){
+                            arr3.push(iterator2.player1Score)
+                            arr3.push(iterator2.player2Score)  
+                            arr2.push(arr3)              
+                        }
+                        if(j == matches.length - 1){
+                            scoreArr.push(arr2)
+                        }
+                    }
+                }
+                console.log(scoreArr)
+
+                var singleElimination = {
+                    "teams": temp,
+                    "results": scoreArr
+                }
+                $('.singleTournament').bracket({
+                    init:singleElimination
+                })
+            })
+            
+
+
+            
+
+        </script>
+    </body>
+</html>
